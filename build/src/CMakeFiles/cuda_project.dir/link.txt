@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcuda_project.a CMakeFiles/cuda_project.dir/temp.cpp.o
+/usr/bin/ranlib libcuda_project.a

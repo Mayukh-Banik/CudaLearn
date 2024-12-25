@@ -1,0 +1,13 @@
+/home/weket/CudaLearn/build/CMakeFiles/edit_cache.dir
+/home/weket/CudaLearn/build/CMakeFiles/rebuild_cache.dir
+/home/weket/CudaLearn/build/include/CMakeFiles/edit_cache.dir
+/home/weket/CudaLearn/build/include/CMakeFiles/rebuild_cache.dir
+/home/weket/CudaLearn/build/src/CMakeFiles/cuda_project.dir
+/home/weket/CudaLearn/build/src/CMakeFiles/edit_cache.dir
+/home/weket/CudaLearn/build/src/CMakeFiles/rebuild_cache.dir
+/home/weket/CudaLearn/build/ext/nanobind/CMakeFiles/edit_cache.dir
+/home/weket/CudaLearn/build/ext/nanobind/CMakeFiles/rebuild_cache.dir
+/home/weket/CudaLearn/build/bindings/CMakeFiles/my_ext.dir
+/home/weket/CudaLearn/build/bindings/CMakeFiles/nanobind-static.dir
+/home/weket/CudaLearn/build/bindings/CMakeFiles/edit_cache.dir
+/home/weket/CudaLearn/build/bindings/CMakeFiles/rebuild_cache.dir

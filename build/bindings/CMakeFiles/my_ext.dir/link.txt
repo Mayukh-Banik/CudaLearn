@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -O3 -DNDEBUG -Wl,-s -Wl,--gc-sections -shared  -o my_ext.cpython-310-x86_64-linux-gnu.so CMakeFiles/my_ext.dir/my_ext.cpp.o  libnanobind-static.a ../src/libcuda_project.a
