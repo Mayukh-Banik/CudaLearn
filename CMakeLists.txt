@@ -20,6 +20,7 @@ option(ENABLE_TESTS "Enable building tests" OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/nanobind)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest)
 
 # Conditionally compile bindings (shared library)
 if(ENABLE_BINDINGS)

@@ -1,6 +1,9 @@
 # List of source files to compile
-set(SOURCE_FILES
-    temp.cpp)
+file(GLOB_RECURSE SOURCE_FILES
+    "*.cu"
+    "*.cpp"
+    "*.c"
+)
 
 # Compile all sources in src/ directory
 add_library(cuda_project ${SOURCE_FILES})
