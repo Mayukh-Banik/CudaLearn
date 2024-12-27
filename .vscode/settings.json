@@ -4,6 +4,8 @@
         "*.cu": "cuda-cpp",
         "cstdlib": "cpp",
         "*.tcc": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "stdexcept": "cpp",
+        "vector": "cpp"
     }
 }
