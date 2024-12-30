@@ -24,4 +24,6 @@ public:
     DoubleTensor(std::vector<std::vector<double>> Values, std::string Device = "cpu");
 
     ~DoubleTensor();
+
+    const std::string toString(bool Debug = false);
 };
