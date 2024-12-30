@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt -y install python3-dev
 
 # Set working directory
-WORKDIR /app
+# WORKDIR /app
 
 # Download and build CMake 3.31.3 from source
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.3/cmake-3.31.3-Linux-x86_64.sh \
@@ -31,8 +31,11 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.3/cmake-3.31.3
 # Verify CMake installation
 RUN cmake --version
 
-# Copy project files
-COPY . .
+RUN git clone https://github.com/Mayukh-Banik/CudaLearn.git
+
+WORKDIR /CudaLearn
+
+RUN git submodule update --init --recursive
 
 # Create build directory and run CMake
 RUN cmake -B build -S . -DENABLE_TESTS=ON && \

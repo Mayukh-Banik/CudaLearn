@@ -2,13 +2,13 @@
 #include <stdexcept>
 #include <cuda_runtime_api.h>
 
-DoubleTensor *empty(uint64_t val, std::string Device = "cpu")
+DoubleTensor *empty(uint64_t val, std::string Device)
 {
     std::tuple<uint64_t, uint64_t> values = {val, 1};
     return empty(values, Device);
 }
 
-DoubleTensor *empty(std::vector<uint64_t> shape, std::string Device = "cpu")
+DoubleTensor *empty(std::vector<uint64_t> shape, std::string Device)
 {
     if (shape.empty())
     {
@@ -29,13 +29,15 @@ DoubleTensor *empty(std::vector<uint64_t> shape, std::string Device = "cpu")
     return nullptr;
 }
 
-DoubleTensor *empty(std::tuple<uint64_t, uint64_t> shape, std::string Device = "cpu")
+DoubleTensor *empty(std::tuple<uint64_t, uint64_t> shape, std::string Device)
 {
     std::vector<uint64_t> val = {std::get<0>(shape), std::get<1>(shape)};
     return new DoubleTensor(val, Device);
 }
 
-DoubleTensor *eye(uint64_t N, uint64_t M = 0, int64_t K = 0, std::string Device = "cpu")
+__global__ void eyeHelper();
+
+DoubleTensor *eye(uint64_t N, uint64_t M, int64_t K, std::string Device)
 {
     M = M == 0 ? N : M;
     std::vector<uint64_t> val(N, M);
@@ -59,4 +61,9 @@ DoubleTensor *eye(uint64_t N, uint64_t M = 0, int64_t K = 0, std::string Device 
         }
     }
     return Tensor;
+}
+
+DoubleTensor *identity(uint64_t N, std::string Device)
+{
+    return eye(N, 0, 0, Device);
 }
