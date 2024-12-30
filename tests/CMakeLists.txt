@@ -1,6 +1,7 @@
 # set(TEST_SOURCES main_test.cpp)
 file(GLOB_RECURSE TEST_SOURCES
     "*.cpp"
+    "*.cu"
 )
 
 # Create the test executable
@@ -15,6 +16,8 @@ target_link_libraries(tests PRIVATE
     gtest_main
     cuda_project
 )
+
+set_target_properties(cuda_project PROPERTIES LINKER_LANGUAGE CUDA)
 
 # Optionally, set CUDA separable compilation if needed
 set_target_properties(tests PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
