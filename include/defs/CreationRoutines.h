@@ -13,3 +13,15 @@ DoubleTensor *empty(std::tuple<uint64_t, uint64_t> shape, std::string Device = "
 DoubleTensor *eye(uint64_t N, uint64_t M = 0, int64_t K = 0, std::string Device = "cpu");
 
 DoubleTensor *identity(uint64_t N, std::string Device = "cpu");
+
+DoubleTensor *zeros(uint64_t val, std::string Device = "cpu");
+DoubleTensor *zeros(std::vector<uint64_t> shape, std::string Device = "cpu");
+DoubleTensor *zeros(std::tuple<uint64_t, uint64_t> shape, std::string Device = "cpu");
+
+DoubleTensor *ones(uint64_t val, std::string Device = "cpu");
+DoubleTensor *ones(std::vector<uint64_t> shape, std::string Device = "cpu");
+DoubleTensor *ones(std::tuple<uint64_t, uint64_t> shape, std::string Device = "cpu");
+
+DoubleTensor *fill(uint64_t val, double fill, std::string Device = "cpu");
+DoubleTensor *fill(std::vector<uint64_t> shape, double fill, std::string Device = "cpu");
+DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, double fill, std::string Device = "cpu");

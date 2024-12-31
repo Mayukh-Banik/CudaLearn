@@ -32,6 +32,7 @@ DoubleTensor::DoubleTensor(double val, std::string Device)
         {
             throw std::runtime_error(cudaGetErrorString(err));
         }
+        getDeviceProperties();
     }
     else
     {
@@ -72,6 +73,7 @@ DoubleTensor::DoubleTensor(std::vector<uint64_t> Shape, std::string Device)
         {
             throw std::runtime_error(cudaGetErrorString(err));
         }
+        getDeviceProperties();
     }
     else
     {
@@ -119,6 +121,7 @@ DoubleTensor::DoubleTensor(std::vector<std::vector<double>> Value, std::string D
                 throw std::runtime_error(cudaGetErrorString(err));
             }
         }
+        getDeviceProperties();
     }
     else
     {
