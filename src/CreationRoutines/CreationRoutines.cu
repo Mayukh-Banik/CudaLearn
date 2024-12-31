@@ -1,6 +1,7 @@
 #include "defs/CreationRoutines.h"
 #include <stdexcept>
 #include <cuda_runtime_api.h>
+#include <cmath>
 
 DoubleTensor *empty(uint64_t val, std::string Device)
 {
@@ -35,7 +36,16 @@ DoubleTensor *empty(std::tuple<uint64_t, uint64_t> shape, std::string Device)
     return new DoubleTensor(val, Device);
 }
 
-__global__ void eyeHelper();
+__global__ void eyeHelper(double *Data, const uint64_t (&input)[2], int64_t K)
+{
+    // Thread index (0 -> MAX_THREADS in a block) + Block Dims (Num threads per block) * Block Index (Indexed block in grid)
+    uint64_t index = threadIdx.x + blockDim.x * blockIdx.x;
+    K = K + index;
+    if (K >= 0 && K < input[1] && index < input[0])
+    {
+        Data[index * input[0] + K] = 1.0;
+    }
+}
 
 DoubleTensor *eye(uint64_t N, uint64_t M, int64_t K, std::string Device)
 {
@@ -44,6 +54,16 @@ DoubleTensor *eye(uint64_t N, uint64_t M, int64_t K, std::string Device)
     DoubleTensor *Tensor = new DoubleTensor(val, Device);
     if (Tensor->OnGPU)
     {
+        const uint64_t NRows = Tensor->Shape[0], NColumns = Tensor->Shape[1];
+        const uint32_t MaxThreads = Tensor->deviceProperties.MaxThreadsPerBlock;
+        const uint32_t WarpSize = Tensor->deviceProperties.WarpSize;
+        dim3 Blocks(
+            std::ceil((double)NRows / (double)MaxThreads),
+            1, 1);
+        dim3 Threads(
+            Tensor->Shape[0] >= MaxThreads - WarpSize ? MaxThreads : std::ceil(NRows / WarpSize) * WarpSize,
+            1, 1);
+        eyeHelper<<<Blocks, Threads>>>(Tensor->Data, {NRows, NColumns}, K);
     }
     else
     {

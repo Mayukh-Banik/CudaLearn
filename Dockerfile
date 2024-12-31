@@ -12,9 +12,10 @@ RUN apt-get update && apt-get install -y \
     git \
     libssl-dev \
     wget \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt -y install python3-dev
+# RUN apt -y install python3-dev
 
 # Set working directory
 # WORKDIR /app

@@ -4,10 +4,18 @@
 #include <vector>
 #include <string>
 
-
 class DoubleTensor
 {
 private:
+    struct cudaProp
+    {
+        uint32_t MaxGridSize[3];
+        uint32_t MaxThreadsDim[3];
+        uint32_t MaxThreadsPerBlock;
+        uint32_t WarpSize;
+    };
+    inline void getDeviceProperties();
+
 public:
     double *Data;
     uint64_t ElementCount;
@@ -16,6 +24,7 @@ public:
     std::vector<uint64_t> Strides;
     std::string Device;
     bool OnGPU;
+    cudaProp deviceProperties;
 
     DoubleTensor(double val, std::string Device = "cpu");
 

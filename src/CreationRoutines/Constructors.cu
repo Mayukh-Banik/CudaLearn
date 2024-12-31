@@ -4,11 +4,12 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <cstring>
+#include <cuda_runtime.h>
 
 /**
  * @brief Tensor from a scalar value, default CPU
- * 
- * @details Creates a Tensor from the supplied double value, 
+ *
+ * @details Creates a Tensor from the supplied double value,
  *  internally its always stored as a Matrix. Strides are special to be 0,0
  *  but once exported to a numpy array it will be (8,8)
  */
@@ -54,6 +55,10 @@ DoubleTensor::DoubleTensor(std::vector<uint64_t> Shape, std::string Device)
         break;
     default:
         throw std::invalid_argument("Number of dims > 2.");
+    }
+    if (Shape[0] == 0 || Shape[1] == 0)
+    {
+        throw std::invalid_argument("Shape vals must be >0.");
     }
     this->Shape = Shape;
     this->Strides = {this->Shape[1] * this->ItemSize, this->ItemSize};
@@ -117,7 +122,7 @@ DoubleTensor::DoubleTensor(std::vector<std::vector<double>> Value, std::string D
     }
     else
     {
-        this->Data = (double *) malloc(this->ItemSize * this->ElementCount);
+        this->Data = (double *)malloc(this->ItemSize * this->ElementCount);
         if (this->Data == NULL)
         {
             throw std::runtime_error("Memory allocation failed: " + errno);
@@ -138,5 +143,26 @@ DoubleTensor::~DoubleTensor()
     else
     {
         free(this->Data);
+    }
+}
+
+inline void DoubleTensor::getDeviceProperties()
+{
+    cudaDeviceProp prop;
+    int device;
+    if (cudaGetDevice(&device) == cudaSuccess)
+    {
+        cudaGetDeviceProperties(&prop, device);
+
+        this->deviceProperties.MaxGridSize[0] = prop.maxGridSize[0];
+        this->deviceProperties.MaxGridSize[1] = prop.maxGridSize[1];
+        this->deviceProperties.MaxGridSize[2] = prop.maxGridSize[2];
+
+        this->deviceProperties.MaxThreadsDim[0] = prop.maxThreadsDim[0];
+        this->deviceProperties.MaxThreadsDim[1] = prop.maxThreadsDim[1];
+        this->deviceProperties.MaxThreadsDim[2] = prop.maxThreadsDim[2];
+
+        this->deviceProperties.MaxThreadsPerBlock = prop.maxThreadsPerBlock;
+        this->deviceProperties.WarpSize = prop.warpSize;
     }
 }
