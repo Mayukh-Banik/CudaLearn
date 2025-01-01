@@ -25,3 +25,6 @@ DoubleTensor *ones(std::tuple<uint64_t, uint64_t> shape, std::string Device = "c
 DoubleTensor *fill(uint64_t val, double fill, std::string Device = "cpu");
 DoubleTensor *fill(std::vector<uint64_t> shape, double fill, std::string Device = "cpu");
 DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, double fill, std::string Device = "cpu");
+
+DoubleTensor* array(double val, bool copy = true, std::string Device = "cpu");
+DoubleTensor* array(std::vector<std::vector<double>> values, bool copy = true, std::string Device = "cpu");

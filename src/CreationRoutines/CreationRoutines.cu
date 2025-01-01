@@ -252,3 +252,22 @@ DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, const double val, std::
     }
     return Tensor;
 }
+
+DoubleTensor* array(double val, bool copy = true, std::string Device = "cpu")
+{
+    return new DoubleTensor(val, Device);
+}
+
+DoubleTensor* array(std::vector<std::vector<double>> values, bool copy = true, std::string Device = "cpu")
+{
+    DoubleTensor* Tensor = nullptr;
+    if (copy)
+    {
+        Tensor = new DoubleTensor(values, Device);
+    }
+    else
+    {
+        Tensor = new DoubleTensor(Device);
+    }
+    return Tensor;
+}

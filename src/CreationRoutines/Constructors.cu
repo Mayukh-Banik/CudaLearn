@@ -169,3 +169,17 @@ inline void DoubleTensor::getDeviceProperties()
         this->deviceProperties.WarpSize = prop.warpSize;
     }
 }
+
+DoubleTensor::DoubleTensor(std::string Device)
+{
+    this->Device = Device;
+    if (Device == "cpu")
+    {
+        this->OnGPU = false;
+    }
+    else
+    {
+        this->OnGPU = true;
+        getDeviceProperties();
+    }
+}
