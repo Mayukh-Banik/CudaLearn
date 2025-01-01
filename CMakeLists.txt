@@ -4,6 +4,8 @@ project(cuda_project LANGUAGES CXX CUDA)
 
 set(DEV_MODULE Development.Module)
 
+set(CMAKE_CUDA_ARCHITECTURES native)
+
 find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
 
 # Set default build type to Release

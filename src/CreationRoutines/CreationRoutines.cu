@@ -90,13 +90,13 @@ DoubleTensor *identity(uint64_t N, std::string Device)
     return eye(N, 0, 0, Device);
 }
 
-DoubleTensor *zeros(uint64_t val, std::string Device = "cpu")
+DoubleTensor *zeros(uint64_t val, std::string Device)
 {
     std::tuple<uint64_t, uint64_t> values = {val, 1};
     return zeros(values, Device);
 }
 
-DoubleTensor *zeros(std::vector<uint64_t> shape, std::string Device = "cpu")
+DoubleTensor *zeros(std::vector<uint64_t> shape, std::string Device)
 {
     if (shape.empty())
     {
@@ -117,7 +117,7 @@ DoubleTensor *zeros(std::vector<uint64_t> shape, std::string Device = "cpu")
     return nullptr;
 }
 
-DoubleTensor *zeros(std::tuple<uint64_t, uint64_t> shape, std::string Device = "cpu")
+DoubleTensor *zeros(std::tuple<uint64_t, uint64_t> shape, std::string Device)
 {
     std::vector<uint64_t> val = {std::get<0>(shape), std::get<1>(shape)};
     DoubleTensor *Tensor = new DoubleTensor(val, Device);
@@ -136,13 +136,13 @@ DoubleTensor *zeros(std::tuple<uint64_t, uint64_t> shape, std::string Device = "
     return Tensor;
 }
 
-DoubleTensor *ones(uint64_t val, std::string Device = "cpu")
+DoubleTensor *ones(uint64_t val, std::string Device)
 {
     std::tuple<uint64_t, uint64_t> values = {val, 1};
     return ones(values, Device);
 }
 
-DoubleTensor *ones(std::vector<uint64_t> shape, std::string Device = "cpu")
+DoubleTensor *ones(std::vector<uint64_t> shape, std::string Device)
 {
     if (shape.empty())
     {
@@ -163,7 +163,7 @@ DoubleTensor *ones(std::vector<uint64_t> shape, std::string Device = "cpu")
     return nullptr;
 }
 
-DoubleTensor *ones(std::tuple<uint64_t, uint64_t> shape, std::string Device = "cpu")
+DoubleTensor *ones(std::tuple<uint64_t, uint64_t> shape, std::string Device)
 {
     std::vector<uint64_t> val = {std::get<0>(shape), std::get<1>(shape)};
     DoubleTensor *Tensor = new DoubleTensor(val, Device);
@@ -199,13 +199,13 @@ __global__ void deviceFillAllValuesWithConstant(double *Data, uint64_t NumElem, 
     }
 }
 
-DoubleTensor *fill(uint64_t val, double vals, std::string Device = "cpu")
+DoubleTensor *fill(uint64_t val, double vals, std::string Device)
 {
     std::tuple<uint64_t, uint64_t> values = {val, 1};
     return fill(values, vals, Device);
 }
 
-DoubleTensor *fill(std::vector<uint64_t> shape, double vals, std::string Device = "cpu")
+DoubleTensor *fill(std::vector<uint64_t> shape, double vals, std::string Device)
 {
     if (shape.empty())
     {
@@ -226,10 +226,10 @@ DoubleTensor *fill(std::vector<uint64_t> shape, double vals, std::string Device 
     return nullptr;
 }
 
-DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, const double val, std::string Device = "cpu")
+DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, const double val, std::string Device)
 {
-    std::vector<uint64_t> val = {std::get<0>(shape), std::get<1>(shape)};
-    DoubleTensor *Tensor = new DoubleTensor(val, Device);
+    std::vector<uint64_t> vals = {std::get<0>(shape), std::get<1>(shape)};
+    DoubleTensor *Tensor = new DoubleTensor(vals, Device);
     if (Tensor->OnGPU)
     {
         const uint64_t NRows = Tensor->Shape[0], NColumns = Tensor->Shape[1];
@@ -253,12 +253,12 @@ DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, const double val, std::
     return Tensor;
 }
 
-DoubleTensor* array(double val, bool copy = true, std::string Device = "cpu")
+DoubleTensor* array(double val, bool copy, std::string Device)
 {
     return new DoubleTensor(val, Device);
 }
 
-DoubleTensor* array(std::vector<std::vector<double>> values, bool copy = true, std::string Device = "cpu")
+DoubleTensor* array(std::vector<std::vector<double>> values, bool copy, std::string Device)
 {
     DoubleTensor* Tensor = nullptr;
     if (copy)
