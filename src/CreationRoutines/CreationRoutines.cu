@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <cuda_runtime_api.h>
 #include <cmath>
+#include <sstream>
 
 __global__ void deviceFillAllValuesWithConstant(double *Data, uint64_t NumElem, double val);
 
@@ -253,21 +254,96 @@ DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, const double val, std::
     return Tensor;
 }
 
-DoubleTensor* array(double val, bool copy, std::string Device)
+DoubleTensor* array(double val, std::string Device)
 {
     return new DoubleTensor(val, Device);
 }
 
-DoubleTensor* array(std::vector<std::vector<double>> values, bool copy, std::string Device)
+DoubleTensor* array(std::vector<std::vector<double>> values, std::string Device)
 {
     DoubleTensor* Tensor = nullptr;
-    if (copy)
-    {
+
         Tensor = new DoubleTensor(values, Device);
+
+    return Tensor;
+}
+
+DoubleTensor *array(nanobind::ndarray<double, nanobind::shape<-1, -1>, nanobind::any_contig> array, bool copy)
+{
+    std::ostringstream S;
+    if (array.DeviceType == nanobind::device::cpu::value)
+    {
+        S << "cpu";
     }
     else
     {
-        Tensor = new DoubleTensor(Device);
+        S << "cuda:" << array.device_id();
     }
-    return Tensor;
+    DoubleTensor* tensor = new DoubleTensor(S.str());
+    tensor->ElementCount = array.size();
+    tensor->Shape[0] = array.shape_ptr()[0];
+    tensor->Shape[1] = array.shape_ptr()[1];
+    tensor->Strides[0] = array.stride_ptr()[0];
+    tensor->Strides[1] = array.stride_ptr()[1];
+    tensor->Order[0] = array.Order;
+    if (copy)
+    {
+        if (tensor->OnGPU)
+        {
+            cudaError_t err = cudaMemcpy(tensor->Data, array.data(), tensor->ElementCount * tensor->ItemSize, cudaMemcpyDeviceToDevice);
+            if (err != cudaSuccess)
+            {
+                throw std::runtime_error("Error copying over data in GPU memory, try setting copy to false.");
+            }
+        }
+        else
+        {
+            memcpy(tensor->Data, array.data(), tensor->ElementCount * tensor->ItemSize);
+        }
+    }
+    else
+    {
+        tensor->Data = array.data();
+    }
+    return tensor;
+}
+
+DoubleTensor *array(nanobind::ndarray<double, nanobind::shape<-1>, nanobind::any_contig> array, bool copy)
+{
+    std::ostringstream S;
+    if (array.DeviceType == nanobind::device::cpu::value)
+    {
+        S << "cpu";
+    }
+    else
+    {
+        S << "cuda:" << array.device_id();
+    }
+    DoubleTensor* tensor = new DoubleTensor(S.str());
+    tensor->ElementCount = array.size();
+    tensor->Shape[0] = array.shape_ptr()[0];
+    tensor->Shape[1] = 1;
+    tensor->Strides[0] = array.stride_ptr()[0];
+    tensor->Strides[1] = 1;
+    tensor->Order[0] = array.Order;
+    if (copy)
+    {
+        if (tensor->OnGPU)
+        {
+            cudaError_t err = cudaMemcpy(tensor->Data, array.data(), tensor->ElementCount * tensor->ItemSize, cudaMemcpyDeviceToDevice);
+            if (err != cudaSuccess)
+            {
+                throw std::runtime_error("Error copying over data in GPU memory, try setting copy to false.");
+            }
+        }
+        else
+        {
+            memcpy(tensor->Data, array.data(), tensor->ElementCount * tensor->ItemSize);
+        }
+    }
+    else
+    {
+        tensor->Data = array.data();
+    }
+    return tensor;
 }

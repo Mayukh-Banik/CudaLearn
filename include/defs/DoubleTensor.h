@@ -25,7 +25,8 @@ public:
     std::string Device;
     bool OnGPU;
     cudaProp deviceProperties;
-    const std::string Order = "C";
+    std::string Order = "C";
+    bool ReadOnly = false;
 
     DoubleTensor(std::string Device);
 

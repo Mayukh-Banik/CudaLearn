@@ -2,6 +2,7 @@
 
 #include "defs/DoubleTensor.h"
 #include <tuple>
+#include "nanobind/ndarray.h"
 
 /**
  * @brief Numpy empty method, default to 1, 1 matrixes
@@ -26,5 +27,7 @@ DoubleTensor *fill(uint64_t val, double fill, std::string Device = "cpu");
 DoubleTensor *fill(std::vector<uint64_t> shape, double fill, std::string Device = "cpu");
 DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, double fill, std::string Device = "cpu");
 
-DoubleTensor* array(double val, bool copy = true, std::string Device = "cpu");
-DoubleTensor* array(std::vector<std::vector<double>> values, bool copy = true, std::string Device = "cpu");
+DoubleTensor *array(double val, std::string Device = "cpu");
+DoubleTensor *array(std::vector<std::vector<double>> values, std::string Device = "cpu");
+DoubleTensor *array(nanobind::ndarray<double, nanobind::shape<-1, -1>, nanobind::any_contig> array, bool copy = false);
+DoubleTensor *array(nanobind::ndarray<double, nanobind::shape<-1>, nanobind::any_contig> array, bool copy = false);

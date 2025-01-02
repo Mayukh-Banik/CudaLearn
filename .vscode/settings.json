@@ -71,6 +71,9 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "charconv": "cpp",
+        "format": "cpp",
+        "__threading_support": "cpp"
     }
 }

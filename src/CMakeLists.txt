@@ -1,4 +1,6 @@
 # List of source files to compile
+find_package(Python3 COMPONENTS Development REQUIRED)
+
 file(GLOB_RECURSE SOURCE_FILES
     "*.cu"
     "*.cpp"
@@ -9,7 +11,10 @@ file(GLOB_RECURSE SOURCE_FILES
 add_library(cuda_project ${SOURCE_FILES})
 
 # Link to include directory for headers
-target_include_directories(cuda_project PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(cuda_project PUBLIC 
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/ext/nanobind/include
+    ${Python3_INCLUDE_DIRS})
 
 set_target_properties(cuda_project PROPERTIES LINKER_LANGUAGE CUDA)
 
