@@ -20,3 +20,5 @@ set_target_properties(cuda_project PROPERTIES LINKER_LANGUAGE CUDA)
 
 # Enable CUDA if needed
 set_target_properties(cuda_project PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+
+target_compile_options(cuda_project PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler -fPIC>)

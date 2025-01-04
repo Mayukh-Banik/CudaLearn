@@ -1,0 +1,76 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 31,
+      "patch": 1
+    },
+    "configurePresets": [
+      {
+        "name": "default",
+        "displayName": "Default Config",
+        "description": "Default build configuration with tests enabled",
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build",
+        "cacheVariables": {
+          "ENABLE_TESTS": "ON",
+          "ENABLE_BINDIGNS": "OFF"
+        }
+      },
+      {
+        "name": "python-package",
+        "displayName": "Optimized Python Package",
+        "description": "Python Package builder",
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build",
+        "cacheVariables": {
+          "ENABLE_BINDINGS": "ON"
+        }
+      },
+      {
+        "name": "tests-debug",
+        "displayName": "tests-debug",
+        "description": "tests-debug",
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build",
+        "cacheVariables": {
+          "ENABLE_TESTS": "ON",
+          "ENABLE_BINDIGNS": "OFF",
+          "DEBUG" : "ON"
+        }
+      },
+      {
+        "name": "python-package-debug",
+        "displayName": "Optimized Python Package",
+        "description": "Python Package builder",
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build",
+        "cacheVariables": {
+          "ENABLE_BINDINGS": "ON",
+          "DEBUG" : "ON"
+        }
+      }
+    ],
+    "buildPresets": [
+      {
+        "name": "default",
+        "configurePreset": "default",
+        "jobs": 16
+      },
+      {
+        "name": "python-package",
+        "configurePreset": "python-package",
+        "jobs": 16
+      },
+      {
+        "name" : "tests-debug",
+        "configurePreset": "tests-debug",
+        "jobs": 16
+      },
+      {
+        "name": "python-package-debug",
+        "configurePreset": "python-package-debug",
+        "jobs": 16
+      }
+    ]
+  }

@@ -6,6 +6,13 @@ T add(T a, T b)
     return a + b;
 }
 
-NB_MODULE(my_ext, m) {
+template <typename T>
+T sub(T a, T b)
+{
+    return a - b;
+}
+
+NB_MODULE(_DoubleTensor, m) {
     m.def("add", &add<int>);
+    m.def("sub", &sub<int>);
 }
