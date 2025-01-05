@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <cuda_runtime.h>
+#include "defs/CustomCudaMacros.h"
 
 /**
  * @brief Tensor from a scalar value, default CPU
@@ -22,16 +23,9 @@ DoubleTensor::DoubleTensor(double val, std::string Device)
     this->Device = Device;
     if (OnGPU)
     {
-        cudaError_t err = cudaMalloc((void **)&Data, ItemSize);
-        if (err != cudaSuccess)
-        {
-            throw std::runtime_error(cudaGetErrorString(err));
-        }
-        err = cudaMemcpy(this->Data, (void *)&val, this->ItemSize, cudaMemcpyHostToDevice);
-        if (err != cudaSuccess)
-        {
-            throw std::runtime_error(cudaGetErrorString(err));
-        }
+        cudaError_t err = cudaSuccess;
+        CUDA_THROW_RUNTIME_ERROR_CHECK(err, cudaMalloc((void **)&Data, ItemSize))
+        CUDA_THROW_RUNTIME_ERROR_CHECK(err, cudaMemcpy(this->Data, (void *)&val, this->ItemSize, cudaMemcpyHostToDevice))
         getDeviceProperties();
     }
     else
@@ -68,11 +62,13 @@ DoubleTensor::DoubleTensor(std::vector<uint64_t> Shape, std::string Device)
     this->Device = Device;
     if (OnGPU)
     {
-        cudaError_t err = cudaMalloc((void **)&Data, this->ItemSize * this->ElementCount);
-        if (err != cudaSuccess)
-        {
-            throw std::runtime_error(cudaGetErrorString(err));
-        }
+        cudaError_t err;
+        CUDA_THROW_RUNTIME_ERROR_CHECK(err, cudaMalloc((void **)&Data, this->ItemSize * this->ElementCount))
+        // cudaError_t err = cudaMalloc((void **)&Data, this->ItemSize * this->ElementCount);
+        // if (err != cudaSuccess)
+        // {
+        //     throw std::runtime_error(cudaGetErrorString(err));
+        // }
         getDeviceProperties();
     }
     else
@@ -108,18 +104,21 @@ DoubleTensor::DoubleTensor(std::vector<std::vector<double>> Value, std::string D
     this->Device = Device;
     if (OnGPU)
     {
-        cudaError_t err = cudaMalloc((void **)&Data, this->ItemSize * this->ElementCount);
-        if (err != cudaSuccess)
-        {
-            throw std::runtime_error(cudaGetErrorString(err));
-        }
+        cudaError_t err;
+        CUDA_THROW_RUNTIME_ERROR_CHECK(err, cudaMalloc((void **)&Data, this->ItemSize * this->ElementCount))
+        // cudaError_t err = cudaMalloc((void **)&Data, this->ItemSize * this->ElementCount);
+        // if (err != cudaSuccess)
+        // {
+        //     throw std::runtime_error(cudaGetErrorString(err));
+        // }
         for (size_t i = 0, index = 0; i < Value.size(); i++, index = index + Value[i].size())
         {
-            err = cudaMemcpy(Data + index, Value[i].data(), Value[i].size() * this->ItemSize, cudaMemcpyHostToDevice);
-            if (err != cudaSuccess)
-            {
-                throw std::runtime_error(cudaGetErrorString(err));
-            }
+            CUDA_THROW_RUNTIME_ERROR_CHECK(err, cudaMemcpy(Data + index, Value[i].data(), Value[i].size() * this->ItemSize, cudaMemcpyHostToDevice))
+            // err = cudaMemcpy(Data + index, Value[i].data(), Value[i].size() * this->ItemSize, cudaMemcpyHostToDevice);
+            // if (err != cudaSuccess)
+            // {
+            //     throw std::runtime_error(cudaGetErrorString(err));
+            // }
         }
         getDeviceProperties();
     }

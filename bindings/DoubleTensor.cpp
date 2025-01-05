@@ -1,18 +1,22 @@
 #include "nanobind/nanobind.h"
 
-template <typename T>
-T add(T a, T b)
+#include "defs/DoubleTensor.h"
+
+namespace nb = nanobind;
+
+extern void empty(nb::module_ &m);
+
+void classDef(nb::module_ &m)
 {
-    return a + b;
+    nb::class_<DoubleTensor>(m, "DoubleTensor")
+        .def("__str__", [](const DoubleTensor &self) -> std::string
+                { return const_cast<DoubleTensor &>(self).toString(false); })
+        .def("__repr__", [](const DoubleTensor &self) -> std::string
+                { return const_cast<DoubleTensor &>(self).toString(true); });
 }
 
-template <typename T>
-T sub(T a, T b)
+NB_MODULE(_DoubleTensor, m)
 {
-    return a - b;
-}
-
-NB_MODULE(_DoubleTensor, m) {
-    m.def("add", &add<int>);
-    m.def("sub", &sub<int>);
+    classDef(m);
+    empty(m);
 }

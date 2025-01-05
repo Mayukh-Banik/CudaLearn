@@ -3,6 +3,7 @@
 #include <cuda_runtime_api.h>
 #include <cmath>
 #include <sstream>
+#include "defs/CustomCudaMacros.h"
 
 __global__ void deviceFillAllValuesWithConstant(double *Data, uint64_t NumElem, double val);
 
@@ -41,7 +42,6 @@ DoubleTensor *empty(std::tuple<uint64_t, uint64_t> shape, std::string Device)
 
 __global__ void eyeHelper(double *Data, const uint64_t (&input)[2], int64_t K)
 {
-    // Thread index (0 -> MAX_THREADS in a block) + Block Dims (Num threads per block) * Block Index (Indexed block in grid)
     uint64_t index = threadIdx.x + blockDim.x * blockIdx.x;
     K = K + index;
     if (K >= 0 && K < input[1] && index < input[0])
@@ -57,15 +57,7 @@ DoubleTensor *eye(uint64_t N, uint64_t M, int64_t K, std::string Device)
     DoubleTensor *Tensor = new DoubleTensor(val, Device);
     if (Tensor->OnGPU)
     {
-        const uint64_t NRows = Tensor->Shape[0], NColumns = Tensor->Shape[1];
-        const uint32_t MaxThreads = Tensor->deviceProperties.MaxThreadsPerBlock;
-        const uint32_t WarpSize = Tensor->deviceProperties.WarpSize;
-        dim3 Blocks(
-            std::ceil((double)NRows / (double)MaxThreads),
-            1, 1);
-        dim3 Threads(
-            Tensor->Shape[0] >= MaxThreads - WarpSize ? MaxThreads : std::ceil(NRows / WarpSize) * WarpSize,
-            1, 1);
+        ALLOCATE_BLOCKS_THREADS_SINGLE_TENSOR_ALL_VALUES(Tensor)
         eyeHelper<<<Blocks, Threads>>>(Tensor->Data, {NRows, NColumns}, K);
     }
     else
@@ -124,11 +116,8 @@ DoubleTensor *zeros(std::tuple<uint64_t, uint64_t> shape, std::string Device)
     DoubleTensor *Tensor = new DoubleTensor(val, Device);
     if (Tensor->OnGPU)
     {
-        cudaError_t err = cudaMemset(Tensor->Data, 0, Tensor->ElementCount * Tensor->ItemSize);
-        if (err != cudaSuccess)
-        {
-            throw std::runtime_error(cudaGetErrorString(err));
-        }
+        cudaError_t err =
+            CUDA_THROW_RUNTIME_ERROR_CHECK(err, cudaMemset(Tensor->Data, 0, Tensor->ElementCount * Tensor->ItemSize);)
     }
     else
     {
@@ -170,15 +159,7 @@ DoubleTensor *ones(std::tuple<uint64_t, uint64_t> shape, std::string Device)
     DoubleTensor *Tensor = new DoubleTensor(val, Device);
     if (Tensor->OnGPU)
     {
-        const uint64_t NRows = Tensor->Shape[0], NColumns = Tensor->Shape[1];
-        const uint32_t MaxThreads = Tensor->deviceProperties.MaxThreadsPerBlock;
-        const uint32_t WarpSize = Tensor->deviceProperties.WarpSize;
-        dim3 Blocks(
-            std::ceil((double)NRows / (double)MaxThreads),
-            1, 1);
-        dim3 Threads(
-            NRows >= MaxThreads - WarpSize ? MaxThreads : std::ceil(NRows / WarpSize) * WarpSize,
-            1, 1);
+        ALLOCATE_BLOCKS_THREADS_SINGLE_TENSOR_ALL_VALUES(Tensor);
         deviceFillAllValuesWithConstant<<<Blocks, Threads>>>(Tensor->Data, Tensor->ElementCount, 1.0);
     }
     else
@@ -233,15 +214,7 @@ DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, const double val, std::
     DoubleTensor *Tensor = new DoubleTensor(vals, Device);
     if (Tensor->OnGPU)
     {
-        const uint64_t NRows = Tensor->Shape[0], NColumns = Tensor->Shape[1];
-        const uint32_t MaxThreads = Tensor->deviceProperties.MaxThreadsPerBlock;
-        const uint32_t WarpSize = Tensor->deviceProperties.WarpSize;
-        dim3 Blocks(
-            std::ceil((double)NRows / (double)MaxThreads),
-            1, 1);
-        dim3 Threads(
-            NRows >= MaxThreads - WarpSize ? MaxThreads : std::ceil(NRows / WarpSize) * WarpSize,
-            1, 1);
+        ALLOCATE_BLOCKS_THREADS_SINGLE_TENSOR_ALL_VALUES(Tensor)
         deviceFillAllValuesWithConstant<<<Blocks, Threads>>>(Tensor->Data, Tensor->ElementCount, val);
     }
     else
@@ -254,16 +227,16 @@ DoubleTensor *fill(std::tuple<uint64_t, uint64_t> shape, const double val, std::
     return Tensor;
 }
 
-DoubleTensor* array(double val, std::string Device)
+DoubleTensor *array(double val, std::string Device)
 {
     return new DoubleTensor(val, Device);
 }
 
-DoubleTensor* array(std::vector<std::vector<double>> values, std::string Device)
+DoubleTensor *array(std::vector<std::vector<double>> values, std::string Device)
 {
-    DoubleTensor* Tensor = nullptr;
+    DoubleTensor *Tensor = nullptr;
 
-        Tensor = new DoubleTensor(values, Device);
+    Tensor = new DoubleTensor(values, Device);
 
     return Tensor;
 }
@@ -279,7 +252,7 @@ DoubleTensor *array(nanobind::ndarray<double, nanobind::shape<-1, -1>, nanobind:
     {
         S << "cuda:" << array.device_id();
     }
-    DoubleTensor* tensor = new DoubleTensor(S.str());
+    DoubleTensor *tensor = new DoubleTensor(S.str());
     tensor->ElementCount = array.size();
     tensor->Shape[0] = array.shape_ptr()[0];
     tensor->Shape[1] = array.shape_ptr()[1];
@@ -290,11 +263,8 @@ DoubleTensor *array(nanobind::ndarray<double, nanobind::shape<-1, -1>, nanobind:
     {
         if (tensor->OnGPU)
         {
-            cudaError_t err = cudaMemcpy(tensor->Data, array.data(), tensor->ElementCount * tensor->ItemSize, cudaMemcpyDeviceToDevice);
-            if (err != cudaSuccess)
-            {
-                throw std::runtime_error("Error copying over data in GPU memory, try setting copy to false.");
-            }
+            cudaError_t err;
+            CUDA_THROW_RUNTIME_ERROR_CHECK(err, cudaMemcpy(tensor->Data, array.data(), tensor->ElementCount * tensor->ItemSize, cudaMemcpyDeviceToDevice))
         }
         else
         {
@@ -319,7 +289,7 @@ DoubleTensor *array(nanobind::ndarray<double, nanobind::shape<-1>, nanobind::any
     {
         S << "cuda:" << array.device_id();
     }
-    DoubleTensor* tensor = new DoubleTensor(S.str());
+    DoubleTensor *tensor = new DoubleTensor(S.str());
     tensor->ElementCount = array.size();
     tensor->Shape[0] = array.shape_ptr()[0];
     tensor->Shape[1] = 1;
