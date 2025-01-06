@@ -1,4 +1,4 @@
 build/
 venv/
 .vscode/
-DoubleTensor/DoubleTensor*
+DoubleTensor/_DoubleTensor*
