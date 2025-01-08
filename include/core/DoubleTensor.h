@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 class DoubleTensor
 {
@@ -19,8 +20,9 @@ public:
 
     // Python buffer protocol section"
     double *buf;
+    // length in bytes
     uint64_t len;
-    int readonly;
+    const bool readOnly = false;
     const uint64_t itemsize = sizeof(double);
     const std::string format = "d";
     int ndim;
@@ -30,18 +32,20 @@ public:
 
     int deviceNumber;
     uint64_t elementCount;
-    bool onGPU;
 
     /**
      * Sets cudaProperties, and deviceNumber.
      */
     void setDeviceProperties();
 
-    DoubleTensor(double value, int device = 0, int readonly = 0);
+    DoubleTensor(double value);
+    // Init a 1D vector
+    DoubleTensor(std::vector<double> vector);
+    DoubleTensor(std::vector<std::vector<double>> vector);
+    // Used for private init, don't bind to python
+    DoubleTensor(uint64_t emptyAmount);
 
     ~DoubleTensor();
-
-    double& operator[](uint64_t index);
 
     void setIndex(double val, uint64_t index);
     double getIndex(uint64_t index);
