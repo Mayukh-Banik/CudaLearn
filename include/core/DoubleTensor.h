@@ -26,7 +26,7 @@ public:
     const bool readOnly = false;
     const uint64_t itemsize = sizeof(double);
     const std::string format = "d";
-    int ndim;
+    uint64_t ndim;
     uint64_t *shape;
     uint64_t *strides;
     // End Python buffer protocol section

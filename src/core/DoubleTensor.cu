@@ -1,11 +1,14 @@
-#include "core/DoubleTensor.h"
-
-#include "cuda_runtime_api.h"
+#include <cuda_runtime_api.h>
 #include <cstdlib>
 #include <stdexcept>
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <functional>
+#include <iomanip>
+
+#include "core/DoubleTensor.h"
+#include "core/CommonCudaMacros.h"
 
 void DoubleTensor::setDeviceProperties()
 {
@@ -278,7 +281,6 @@ __global__ void CUDA_MEM_EQUAL(const double *ptr1, const double *ptr2, const uin
         {
             *val = 1;
         }
-        printf("Hello \n\n\n\n\n\n");
     }
 }
 
@@ -291,44 +293,21 @@ bool DoubleTensor::equals(const DoubleTensor &other) noexcept
             return false;
         }
         int *x;
-        cudaMalloc((void **)&x, sizeof(int));
+        cudaError_t err;
+        CUDA_CHECK_ERROR(err, cudaMalloc((void**) &x, sizeof(int)), std::runtime_error)
+        // cudaMalloc((void **)&x, sizeof(int));
         int y = 0;
-        cudaMemcpy(x, &y, sizeof(int), cudaMemcpyHostToDevice);
+        CUDA_CHECK_ERROR(err, cudaMemcpy(x, &y, sizeof(int), cudaMemcpyHostToDevice), std::runtime_error)
+        // cudaMemcpy(x, &y, sizeof(int), cudaMemcpyHostToDevice);
         uint64_t d = this->elementCount / this->cudaProperties.maxThreadsPerBlock <= 1
                          ? 1
                          : this->elementCount / this->cudaProperties.maxThreadsPerBlock;
         CUDA_MEM_EQUAL<<<d, this->cudaProperties.maxThreadsPerBlock>>>(this->buf, other.buf, this->elementCount, x);
-        cudaMemcpy(&y, x, sizeof(int), cudaMemcpyDeviceToHost);
-        cudaFree(x);
+        CUDA_CHECK_ERROR(err, cudaMemcpy(&y, x, sizeof(int), cudaMemcpyDeviceToHost), std::runtime_error)
+        // cudaMemcpy(&y, x, sizeof(int), cudaMemcpyDeviceToHost);
+        CUDA_CHECK_ERROR(err, cudaFree(x), std::runtime_error)
+        // cudaFree(x);
         return y == 1 ? false : true;
-        ;
-    }
-    catch (const std::exception &e)
-    {
-        return false;
-    }
-}
-
-bool DoubleTensor::operator==(const DoubleTensor &other) const noexcept
-{
-    try
-    {
-        if (this->elementCount != other.elementCount)
-        {
-            return false;
-        }
-        int *x;
-        cudaMalloc((void **)&x, sizeof(int));
-        int y = 0;
-        cudaMemcpy(x, &y, sizeof(int), cudaMemcpyHostToDevice);
-        uint64_t d = this->elementCount / this->cudaProperties.maxThreadsPerBlock <= 1
-                         ? 1
-                         : this->elementCount / this->cudaProperties.maxThreadsPerBlock;
-        CUDA_MEM_EQUAL<<<d, this->cudaProperties.maxThreadsPerBlock>>>(this->buf, other.buf, this->elementCount, x);
-        cudaMemcpy(&y, x, sizeof(int), cudaMemcpyDeviceToHost);
-        cudaFree(x);
-        return y == 1 ? false : true;
-        ;
     }
     catch (const std::exception &e)
     {
@@ -346,7 +325,7 @@ std::string DoubleTensor::toString(bool Debug) const
         s << "Element Count: " << this->elementCount << std::endl;
         s << "Number of Dimensions: " << this->ndim << std::endl;
         s << "Shape: (";
-        for (int i = 0; i < this->ndim; i++)
+        for (uint64_t i = 0; i < this->ndim; i++)
         {
             s << this->shape[i];
             if (i < this->ndim - 1)
@@ -354,7 +333,7 @@ std::string DoubleTensor::toString(bool Debug) const
         }
         s << ")" << std::endl;
         s << "Strides: (";
-        for (int i = 0; i < this->ndim; i++)
+        for (uint64_t i = 0; i < this->ndim; i++)
         {
             s << this->strides[i];
             if (i < this->ndim - 1)
@@ -363,5 +342,48 @@ std::string DoubleTensor::toString(bool Debug) const
         s << ")" << std::endl;
         s << "Device: cuda:" << this->deviceNumber << std::endl;
     }
+
+    double *data = (double *)malloc(this->len);
+    cudaMemcpy(data, this->buf, this->len, cudaMemcpyDeviceToHost);
+    std::function<void(int, uint64_t)> printArray = [&](uint64_t dim, uint64_t offset)
+    {
+        if (dim < this->ndim - 1)
+        {
+            s << "[";
+            for (uint64_t i = 0; i < shape[dim]; i++)
+            {
+                printArray(dim + 1, offset + i * strides[dim]);
+                if (i < shape[dim] - 1)
+                {
+                    s << std::endl;
+                    for (uint64_t j = 0; j <= dim; j++)
+                        s << " ";
+                }
+            }
+            s << "]";
+        }
+        else
+        {
+            s << "[";
+            for (uint64_t i = 0; i < shape[dim]; i++)
+            {
+                double value = data[offset / sizeof(double) + i * strides[dim] / sizeof(double)];
+                s << std::fixed << std::setprecision(6) << value;
+                if (i < shape[dim] - 1)
+                    s << ", ";
+            }
+            s << "]";
+        }
+    };
+    if (this->ndim == 0)
+    {
+        s << "[" << std::fixed << std::setprecision(6) << data[0] << "]";
+    }
+    else
+    {
+        printArray(0,0);
+    }
+    s << std::endl;
+    free(data);
     return s.str();
 }

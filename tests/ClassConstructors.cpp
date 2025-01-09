@@ -88,12 +88,8 @@ TEST(Equals, TwoMatrixes)
     std::vector<std::vector<double>> vec = {
         {1.0, 2.0},
         {3.0, 4.0}};
-    DoubleTensor *a;
-    DoubleTensor *b;
-    ASSERT_NO_THROW(a = new DoubleTensor(vec));
-    ASSERT_NO_THROW(b = new DoubleTensor(vec));
-
-    ASSERT_EQ(a->toString(), b->toString());
-    ASSERT_NO_THROW(delete (a));
-    ASSERT_NO_THROW(delete (b));
+    DoubleTensor a(vec);
+    DoubleTensor b(vec);
+    // ASSERT_TRUE(a == b);
+    ASSERT_TRUE(a.equals(b));
 }
