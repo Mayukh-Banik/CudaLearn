@@ -2,6 +2,7 @@
 
 #include "core/DoubleTensor.h"
 #include <vector>
+#include <iostream>
 
 TEST(SingleValue, Baisc)
 {
@@ -50,6 +51,7 @@ TEST(VectorConstructor, OneDimensionalVector)
     ASSERT_EQ(a->elementCount, 4);
     ASSERT_EQ(a->ndim, 1);
     ASSERT_EQ(a->shape[0], 4);
+    ASSERT_EQ(a->strides[0], 8);
 
     for (uint64_t i = 0; i < a->elementCount; ++i)
     {
@@ -58,7 +60,7 @@ TEST(VectorConstructor, OneDimensionalVector)
     ASSERT_NO_THROW(delete (a));
 }
 
-TEST(VectorConstructor, TwoDimensionalVector)
+TEST(VectorConstructor, Matrix)
 {
     std::vector<std::vector<double>> vec = {
         {1.0, 2.0},
@@ -79,4 +81,19 @@ TEST(VectorConstructor, TwoDimensionalVector)
     ASSERT_DOUBLE_EQ(a->getIndex(3), 4.0);
 
     ASSERT_NO_THROW(delete (a));
+}
+
+TEST(Equals, TwoMatrixes)
+{
+    std::vector<std::vector<double>> vec = {
+        {1.0, 2.0},
+        {3.0, 4.0}};
+    DoubleTensor *a;
+    DoubleTensor *b;
+    ASSERT_NO_THROW(a = new DoubleTensor(vec));
+    ASSERT_NO_THROW(b = new DoubleTensor(vec));
+
+    ASSERT_EQ(a->toString(), b->toString());
+    ASSERT_NO_THROW(delete (a));
+    ASSERT_NO_THROW(delete (b));
 }

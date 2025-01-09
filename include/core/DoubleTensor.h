@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <nanobind/ndarray.h>
 
 class DoubleTensor
 {
@@ -42,12 +43,24 @@ public:
     // Init a 1D vector
     DoubleTensor(std::vector<double> vector);
     DoubleTensor(std::vector<std::vector<double>> vector);
+    // emulating tuple
+    DoubleTensor(const std::vector<uint64_t> &vector);
     // Used for private init, don't bind to python
     DoubleTensor(uint64_t emptyAmount);
+
+    DoubleTensor *T() const;
+
+    DoubleTensor *deepCopy() const;
 
     ~DoubleTensor();
 
     void setIndex(double val, uint64_t index);
     double getIndex(uint64_t index);
 
+    bool equals(const DoubleTensor &other) noexcept;
+    // bool equals(nanobind::ndarray<double, nanobind::c_contig> other) noexcept;
+
+    bool operator==(const DoubleTensor &other) const noexcept;
+
+    std::string toString(bool Debug = false) const;
 };
