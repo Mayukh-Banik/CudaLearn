@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "core/DoubleTensor.h"
+#include "core/CreationRoutines.h"
 #include <vector>
 #include <iostream>
 
