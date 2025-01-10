@@ -35,10 +35,10 @@ DoubleTensor *eye(const uint64_t N, const uint64_t M, const int64_t k)
     DoubleTensor *tensor = zeros(vec);
     uint64_t blocks = N / tensor->cudaProperties.maxThreadsPerBlock + 1;
     uint64_t threads = tensor->cudaProperties.maxThreadsPerBlock;
-    
+
     std::cerr << "Blocks: " << blocks << std::endl;
     std::cerr << "Threads: " << threads << std::endl;
-    
+
     eyeHelper<<<blocks, threads>>>(tensor->buf, vec[0], vec[1], k);
     return tensor;
 }
@@ -56,17 +56,7 @@ DoubleTensor *ones(const uint64_t val)
 
 DoubleTensor *ones(const std::vector<uint64_t> &vals)
 {
-    DoubleTensor *tensor = new DoubleTensor(vals);
-    uint64_t blocks = LAUNCH_BLOCKS(
-        tensor->elementCount, tensor->cudaProperties.maxThreadsPerBlock);
-    uint64_t numThreads =
-        tensor->elementCount < tensor->cudaProperties.maxThreadsPerBlock
-            ? tensor->cudaProperties.maxThreadsPerBlock
-            : LAUNCH_THREADS_LESS_THAN_MAX_THREADS(
-                  tensor->elementCount, tensor->cudaProperties.warpSize);
-    applyValueToAllElements<<<blocks, numThreads>>>(tensor->buf, tensor->elementCount, 0);
-    // applyFunctionToAllElements<<<blocks, numThreads>>>(tensor->buf, tensor->elementCount, ZERO);
-    return tensor;
+    return full(vals, 1);
 }
 
 DoubleTensor *zeros(const uint64_t val)
@@ -77,6 +67,17 @@ DoubleTensor *zeros(const uint64_t val)
 
 DoubleTensor *zeros(const std::vector<uint64_t> &vals)
 {
+    return full(vals, 0);
+}
+
+DoubleTensor *full(const uint64_t val, const double FILL)
+{
+    std::vector<uint64_t> values = {val};
+    return full(values, FILL);
+}
+
+DoubleTensor *full(const std::vector<uint64_t> &vals, const double FILL)
+{
     DoubleTensor *tensor = new DoubleTensor(vals);
     uint64_t blocks = LAUNCH_BLOCKS(
         tensor->elementCount, tensor->cudaProperties.maxThreadsPerBlock);
@@ -85,7 +86,6 @@ DoubleTensor *zeros(const std::vector<uint64_t> &vals)
             ? tensor->cudaProperties.maxThreadsPerBlock
             : LAUNCH_THREADS_LESS_THAN_MAX_THREADS(
                   tensor->elementCount, tensor->cudaProperties.warpSize);
-    applyValueToAllElements<<<blocks, numThreads>>>(tensor->buf, tensor->elementCount, 0);
-    // applyFunctionToAllElements<<<blocks, numThreads>>>(tensor->buf, tensor->elementCount, ONES);
+    applyValueToAllElements<<<blocks, numThreads>>>(tensor->buf, tensor->elementCount, FILL);
     return tensor;
 }

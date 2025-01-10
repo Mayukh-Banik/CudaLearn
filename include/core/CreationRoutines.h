@@ -7,7 +7,6 @@
 DoubleTensor* empty(const uint64_t val);
 DoubleTensor* empty(const std::vector<uint64_t>& vals);
 
-// TODO: All Functions Below
 DoubleTensor* eye(const uint64_t N, const uint64_t M = 0, const int64_t k = 0);
 DoubleTensor* identity(const uint64_t N);
 DoubleTensor* ones(const uint64_t val);
